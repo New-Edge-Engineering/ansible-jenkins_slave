@@ -1,0 +1,31 @@
+---
+# software install
+- name: ensure jenkins slave is at the latest version
+  apt: pkg=jenkins-slave state=latest update_cache=yes
+  notify:
+  - restart jenkins slave
+
+# software configuration, adds URL & secret
+- name: add jenkins slave cli configuration file with secret
+  template: >
+    dest=/etc/default/jenkins-slave
+    src=jenkins-slave.j2
+    mode=0644
+  when: secret is defined
+  register: has_secret
+  with_items:
+    - "{{ secret }}"
+  notify:
+  - restart jenkins slave
+
+- name: add jenkins slave cli configuration file
+  template: >
+    dest=/etc/default/jenkins-slave
+    src=jenkins-slave.j2
+    mode=0644
+  when: secret is not defined
+  notify:
+  - restart jenkins slave
+
+# credentials
+- include: aws.yml

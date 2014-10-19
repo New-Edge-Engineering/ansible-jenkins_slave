@@ -1,0 +1,57 @@
+---
+# install software
+- name: ensure s3cmd is at the latest version
+  apt: pkg=s3cmd state=latest
+  register: s3cmd_installed
+  when: jenkins_aws_access is defined and jenkins_aws_access != None
+  tags:
+    - packages
+    - jenkins
+    - aws
+
+- name: create jenkins AWS credentials for s3 sync
+  template: dest=/var/lib/jenkins/.s3cfg src=s3cfg.j2 owner=jenkins group=jenkins mode=0600
+  when: s3cmd_installed|changed
+  tags:
+    - aws
+    - jenkins
+
+# sync .ssh folder down
+- name: create /var/lib/jenkins/.ssh if missing
+  file:
+    path=/var/lib/jenkins/.ssh
+    owner=jenkins
+    group=nogroup
+    mode=744
+    state=directory
+  tags:
+    - ssh
+    - jenkins
+
+- name: retrieve backed upped ssh files
+  sudo: yes
+  sudo_user: jenkins
+  command: "s3cmd --config=/var/lib/jenkins/.s3cfg --force --recursive get s3://jenkins.{{ jenkins_domain }}/.ssh/ /var/lib/jenkins/.ssh"
+  when: jenkins_aws_access is defined and jenkins_aws_access != None
+  tags:
+    - ssh
+    - jenkins
+
+- name: correct private key permissions
+  file:
+    path=/var/lib/jenkins/.ssh/id_rsa
+    mode=600
+    state=file
+
+# slave ssh s3 pull
+- name: create jenkins ssh file pull from s3
+  cron:
+    name="Jenkins ssh file pull from s3"
+    minute=0
+    hour=0
+    user=jenkins
+    job="/usr/bin/s3cmd --config=/var/lib/jenkins/.s3cfg --force --recursive get s3://jenkins.{{ jenkins_domain }}/.ssh/ /var/lib/jenkins/.ssh > /var/log/jenkins/jobs.log 2>&1"
+  when: jenkins_aws_access is defined and jenkins_aws_access != None
+  tags:
+    - cron
+    - jenkins
