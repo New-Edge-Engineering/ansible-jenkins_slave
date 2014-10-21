@@ -27,5 +27,6 @@
   notify:
   - restart jenkins slave
 
-# credentials
+# credentials (Move to use aws_cli)
 - include: aws.yml
+  when: jenkins_aws_access is defined and jenkins_aws_secret is defined
