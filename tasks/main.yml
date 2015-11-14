@@ -27,6 +27,23 @@
   notify:
   - restart jenkins slave
 
+- name: ensure jenkins is not running to update home directory
+  service:
+    name: jenkins-slave
+    state: stopped
+  notify:
+  - restart jenkins slave
+
+- name: ensure jenkins user home is /var/lib/jenkins
+  user:
+    createhome: no
+    home: /var/lib/jenkins
+    move_home: yes
+    name: jenkins
+  notify:
+  - restart jenkins slave
+
+
 # credentials (Move to use aws_cli)
 - include: aws.yml
   when: jenkins_aws_access is defined and jenkins_aws_secret is defined
