@@ -1,0 +1,4 @@
+---
+# exposing hard values that have changed at some point, may become defaults
+jenkins_slave_master_protocol: https
+jenkins_slave_master_subdomain_name: jenkins

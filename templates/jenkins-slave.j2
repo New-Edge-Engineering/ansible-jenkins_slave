@@ -29,7 +29,7 @@ JENKINS_RUN=/var/run/jenkins
 # URL of jenkins server to connect to 
 # Not specifying this parameter will stop the slave 
 # job from running.
-JENKINS_URL="http://jenkins.{{ jenkins_domain }}"
+JENKINS_URL="{{ jenkins_slave_master_protocol }}://{{ jenkins_slave_master_subdomain_name }}.{{ jenkins_domain }}"
 
 # Name of slave configuration to use at JENKINS_URL
 # Override if it need to be something other than the
