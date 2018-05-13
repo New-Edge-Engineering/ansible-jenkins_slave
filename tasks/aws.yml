@@ -29,8 +29,8 @@
     - jenkins
 
 - name: retrieve backed upped ssh files
-  sudo: yes
-  sudo_user: jenkins
+  become: yes
+  become_user: jenkins
   command: "s3cmd --config=/var/lib/jenkins/.s3cfg --force --recursive get s3://jenkins.{{ jenkins_domain }}/.ssh/ /var/lib/jenkins/.ssh"
   when: jenkins_aws_access is defined and jenkins_aws_access != None
   tags:
